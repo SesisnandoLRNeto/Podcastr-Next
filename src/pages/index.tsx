@@ -1,11 +1,13 @@
-import { useEffect } from "react"
-import { GetStaticProps } from 'next'
+import { useContext, useEffect } from "react"
+import { PlayerContext } from "../contexts/PlayerContext"
+
+import { GetStaticProps } from 'next' 
 import Image from 'next/image'
 import  Link from 'next/link'
 
+import ptBR from 'date-fns/locale/pt-BR'
 import { api } from "../service/api"
 import { format, parseISO } from 'date-fns'
-import ptBR from 'date-fns/locale/pt-BR'
 import { convertDurationToTimeString } from "../utils/convertDurationToTimeString"
 
 import styles from './home.module.scss'
@@ -31,7 +33,7 @@ type HomeProps = {
 }
 
 export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
-
+  const { play } = useContext(PlayerContext)
   //SSR ou SSG
   //console.log(props.episodes)
 
@@ -45,7 +47,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
   return (
     <div className={styles.homePage}>
       <section className={styles.latestEpisodes}>
-        <h2>Últimos lançamentos</h2>
+        <h2>Últimos lançamentos </h2>
 
         <ul>
           {latestEpisodes.map(episode => {
@@ -66,15 +68,16 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                       {episode.title}
                     </a>
                   </Link>
-                  
                   <p>{episode.members}</p>
-
                   <span>{episode.publishedAt}</span>
                   <span>{episode.durationAsString}</span>
-
                 </div>
 
-                <button className={styles.buttonPlay}>
+                <button 
+                  type='button' 
+                  className={styles.buttonPlay}
+                  onClick={() => play(episode)}
+                >
                   <img src="/play-green.svg" alt="Tocar"/>
                 </button>
               </li>
@@ -119,7 +122,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                   <td style={{ width: 100 }}>{episode.publishedAt}</td>
                   <td>{episode.durationAsString}</td>
                   <td>
-                    <button className={styles.buttonPlay}>
+                    <button type='button' className={styles.buttonPlay}>
                       <img src="/play-green.svg" alt="Tocar"/>
                     </button>
                   </td>
@@ -169,7 +172,7 @@ export const getStaticProps: GetStaticProps = async () => {
     params: {
       _limit: 12,
       _sort: 'published_at',
-      order: 'desc'
+      _order: 'desc'
     }
   })
   //ou

@@ -30,24 +30,32 @@ type EpisodeProps = {
 export default function Episode ({ episode }: EpisodeProps) {
   const router = useRouter()
 
+  //fallback sendo true
+  if(router.isFallback){
+    return <p>Carregando ...</p>
+  }
+
   return (
     <div className={styles.episode}>
       <div className={styles.thumbnailContainer}>
+
         <Link href='/'>
           <button type='button'>
             <img src="/arrow-left.svg" alt="Voltar" />
           </button>
         </Link>
-       
+      
         <Image
             width={700}
             height={160}
             src={episode.thumbnail}
             objectFit='cover'
           />
-           <button type='button'>
-          <img src="/play.svg" alt="Tocar" />
-        </button>
+
+          <button type='button'>
+            <img src="/play.svg" alt="Tocar" />
+          </button>
+
       </div>
 
       <header>
@@ -59,17 +67,46 @@ export default function Episode ({ episode }: EpisodeProps) {
 
       <div 
         className={styles.description} 
-        dangerouslySetInnerHTML={{__html: episode.description}}
+        dangerouslySetInnerHTML={{ __html: episode.description }}
       />
 ]
     </div>
   )
 }
 
+//client (browser) - nextjs (nodejs) - server (backend)
 export const getStaticPaths: GetStaticPaths = async () => {
+
+  const { data } = await api.get('episodes', {
+    params: {
+      _limit: 2,
+      _sort: 'published_at',
+      _order: 'desc'
+    }
+  })
+
+  const paths = data.map(episode => {
+    return {
+      params: {
+          slug: episode.id
+      }
+    }
+  })
+
   return {
-    paths: [],
-    fallback: 'blocking'
+    //episodios de forma estatica na build
+    paths,
+    //paths: [ ]
+    //   { params: {
+    //       slug: "como-virar-lider-desenvolvimento" 
+    //     }
+    //   }
+    // ],
+    fallback: 'blocking' 
+    // se false - 404 se nao for gerado no momento da build e passado em path
+    // se true - obriga  o getStaticProps seja executado pelo client side
+    // blocking - obriga o getStaticProps funcionaar pelo server side conforme o acesso dos users
+    // incremental static generation - gerencia 
   }
 }
 
