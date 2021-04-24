@@ -1,9 +1,10 @@
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { usePlayer } from '../../contexts/PlayerContext'
 import { GetStaticPaths, GetStaticProps } from 'next'
-import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
+import Head from 'next/head'
 
 import { api } from '../../service/api'
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString'
@@ -28,15 +29,19 @@ type EpisodeProps = {
 
 
 export default function Episode ({ episode }: EpisodeProps) {
-  const router = useRouter()
-
+  // const router = useRouter()
   //fallback sendo true
-  if(router.isFallback){
-    return <p>Carregando ...</p>
-  }
+  // if(router.isFallback){
+  //   return <p>Carregando ...</p>
+  // }
+
+  const { play } = usePlayer()
 
   return (
     <div className={styles.episode}>
+      <Head>
+        <title> {episode.title} | Podcastr </title>
+      </Head>
       <div className={styles.thumbnailContainer}>
 
         <Link href='/'>
@@ -52,7 +57,10 @@ export default function Episode ({ episode }: EpisodeProps) {
             objectFit='cover'
           />
 
-          <button type='button'>
+          <button 
+            type='button'
+            onClick={() => play(episode)}
+          >
             <img src="/play.svg" alt="Tocar" />
           </button>
 

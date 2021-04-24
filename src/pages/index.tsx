@@ -1,9 +1,9 @@
-import { useContext, useEffect } from "react"
-import { PlayerContext } from "../contexts/PlayerContext"
+import { usePlayer } from "../contexts/PlayerContext"
 
 import { GetStaticProps } from 'next' 
 import Image from 'next/image'
 import  Link from 'next/link'
+import Head from 'next/head'
 
 import ptBR from 'date-fns/locale/pt-BR'
 import { api } from "../service/api"
@@ -28,12 +28,14 @@ type HomeProps = {
   //   title: string;
   //   members: string;
   // }>
-  latestEpisodes: Array<Episode>
+  latestEpisodes: Array<Episode> // ou Episode[]
   allEpisodes: Array<Episode>
 }
 
 export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
-  const { play } = useContext(PlayerContext)
+  const { playList } = usePlayer()
+  const episodeList = [ ...latestEpisodes, ...allEpisodes ]
+
   //SSR ou SSG
   //console.log(props.episodes)
 
@@ -46,11 +48,14 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
 
   return (
     <div className={styles.homePage}>
+      <Head>
+        <title> Home | Podcastr </title>
+      </Head>
       <section className={styles.latestEpisodes}>
         <h2>Últimos lançamentos </h2>
 
         <ul>
-          {latestEpisodes.map(episode => {
+          {latestEpisodes.map((episode, index)=> {
             return(
               <li key={episode.id}>
                 <Image 
@@ -76,7 +81,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                 <button 
                   type='button' 
                   className={styles.buttonPlay}
-                  onClick={() => play(episode)}
+                  onClick={() => playList(episodeList, index)}
                 >
                   <img src="/play-green.svg" alt="Tocar"/>
                 </button>
@@ -101,7 +106,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
             </tr>
           </thead>
           <tbody>
-            {allEpisodes.map(episode=>{
+            {allEpisodes.map((episode, index)=>{
               return(
                 <tr key={episode.id}>
                   <td style={{ width: 100 }}>
@@ -122,7 +127,11 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                   <td style={{ width: 100 }}>{episode.publishedAt}</td>
                   <td>{episode.durationAsString}</td>
                   <td>
-                    <button type='button' className={styles.buttonPlay}>
+                    <button 
+                      type='button' 
+                      className={styles.buttonPlay}
+                      onClick={() => playList(episodeList, index + latestEpisodes.length)}
+                    >
                       <img src="/play-green.svg" alt="Tocar"/>
                     </button>
                   </td>
